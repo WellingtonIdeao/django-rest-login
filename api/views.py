@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, reverse
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, logout, authenticate
 from .forms import LoginForm
 # Create your views here.
 
 
 # FBV - function based view that login a user and redirect to success page.
-def loginView(request):
+def login_view(request):
     template_name = 'api/login.html'
 
     if request.method == "POST":    # if POST
@@ -27,6 +27,11 @@ def loginView(request):
 
     return render(request, template_name, {'form': form})
 
+
+# FBV-function based view that logout a user and clear session data for the current request. Then redirect to login page
+def logout_view(request):
+    logout(request)
+    return redirect(reverse('api:login'))
 
 
 
