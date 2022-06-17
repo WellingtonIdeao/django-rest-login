@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="Api tela de login" >
     <meta name="author" content="Wellington Ideão">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tela de Login</title>
+    <title>{% block title %}{% endblock title %}</title>
 </head>
 <body>
-    <header></header>
+    <header>{% block header %}{% endblock header %}</header>
     <main>
-        <form method="post"> {% csrf_token %}
-            {{form}}
-            <input type="submit" value="entrar">
-        </form>
+        {% block content %}
+        {% endblock content %}
     </main>
-    <footer></footer>
+    <footer>
+        {% block footer %}
+        {% endblock footer %}
+    </footer>
 </body>
 </html>

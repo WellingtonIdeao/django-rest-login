@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.views import LoginView, LogoutView
 from .forms import LoginForm
 # Create your views here.
 
@@ -34,4 +35,7 @@ def logout_view(request):
     return redirect(reverse('api:login'))
 
 
-
+# Authentication views
+# LoginView
+class UserLoginView(LoginView):
+    template_name = 'api/registration/login.html'
