@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.views import LoginView, logout_then_login
+from django.contrib.auth.views import LoginView, LogoutView, logout_then_login
 from .forms import LoginForm
 # Create your views here.
 
@@ -36,5 +36,12 @@ def logout_view(request):
 
 # Authentication views
 # LoginView
+# Authenticated and logged in a user then redirects to the admin index page.
 class UserLoginView(LoginView):
     template_name = 'api/registration/login.html'
+
+
+#LogoutView
+# Logs a user out, then redirects to the login page.
+class UserLogoutView(LogoutView):
+    template_name = 'api/registration/logged_out.html'
