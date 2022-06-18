@@ -104,4 +104,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication views url conf
+LOGIN_URL = 'api:login'
 LOGIN_REDIRECT_URL = 'admin:index'

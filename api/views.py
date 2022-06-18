@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.views import LoginView, logout_then_login
 from .forms import LoginForm
 # Create your views here.
 
@@ -29,10 +29,9 @@ def login_view(request):
     return render(request, template_name, {'form': form})
 
 
-# FBV-function based view that logout a user and clear session data for the current request. Then redirect to login page
+# Logs a user out, then redirects to the login page.
 def logout_view(request):
-    logout(request)
-    return redirect(reverse('api:login'))
+    return logout_then_login(request)
 
 
 # Authentication views
