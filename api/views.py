@@ -31,7 +31,7 @@ def login_view(request):
 
 # Logs a user out, then redirects to the login page.
 def logout_view(request):
-    return logout_then_login(request)
+    return logout_then_login(request, login_url=reverse('api:login'))
 
 
 # Authentication views
