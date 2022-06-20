@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, reverse
+from django.urls import reverse_lazy
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.views import LoginView, LogoutView, logout_then_login
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView,\
+    PasswordChangeDoneView, logout_then_login
 from .forms import LoginForm
 # Create your views here.
 
@@ -41,7 +43,21 @@ class UserLoginView(LoginView):
     template_name = 'api/registration/login.html'
 
 
-#LogoutView
+# LogoutView
 # Logs a user out, then redirects to the login page.
 class UserLogoutView(LogoutView):
     template_name = 'api/registration/logged_out.html'
+
+
+# PasswordChangeView
+# Allows a user to change their password.
+class UserPasswordChangeView(PasswordChangeView):
+    template_name = 'api/registration/password_change_form.html'
+    success_url = reverse_lazy('api:password_change_done')
+
+
+# PasswordChangeDoneView
+# The page shown after a user changed their password.
+# called by success_url in PasswordChangeView.
+class UserPasswordChangeDoneView(PasswordChangeDoneView):
+    template_name = 'api/registration/password_change_done.html'
