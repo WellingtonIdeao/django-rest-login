@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, reverse
 from django.urls import reverse_lazy
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView,\
-    PasswordChangeDoneView, logout_then_login
+    PasswordChangeDoneView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView,\
+    PasswordResetCompleteView, logout_then_login
 from .forms import LoginForm
 # Create your views here.
 
@@ -61,3 +62,31 @@ class UserPasswordChangeView(PasswordChangeView):
 # called by success_url in PasswordChangeView.
 class UserPasswordChangeDoneView(PasswordChangeDoneView):
     template_name = 'api/registration/password_change_done.html'
+
+
+# PasswordResetView
+# Allows a user to reset their password, by generating a one-time use link, and sending that link to user email.
+class UserPasswordResetView(PasswordResetView):
+    template_name = 'api/registration/password_reset_form.html'
+    success_url = reverse_lazy('api:password_reset_done')
+    email_template_name = 'api/registration/password_reset_email.html'
+
+
+# PasswordResetDoneView
+# the page shown after a user reset their password in Password reset view.
+# called by success_url in PasswordResetView
+class UserPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'api/registration/password_reset_done.html'
+
+
+# PasswordResetConfirmView
+# called by a one-time use link in the email send by PasswordResetView.
+# set new password for a user.
+class UserPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'api/registration/password_reset_confirm.html'
+    success_url = reverse_lazy('api:password_reset_complete')
+
+
+# the page shown to confirm that user password is changed.
+class UserPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'api/registration/password_reset_complete.html'

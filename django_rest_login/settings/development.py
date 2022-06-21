@@ -21,3 +21,8 @@ DATABASES = {
     # read os.environ['SQLITE_URL']
     'default': env.db_url('SQLITE_URL'),
 }
+
+# Email Conf
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
