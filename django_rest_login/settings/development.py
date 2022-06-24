@@ -21,6 +21,8 @@ DATABASES = {
     # read os.environ['SQLITE_URL']
     'default': env.db_url('SQLITE_URL'),
 }
+# add  a custom name for test database
+DATABASES['default'].update({'TEST': {'NAME': 'test_api_db'}})
 
 # Email Conf
 
