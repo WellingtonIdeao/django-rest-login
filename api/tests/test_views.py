@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
-from ..views import UserLoginView, UserLogoutView
+from ..views import UserLoginView, UserLogoutView, UserPasswordChangeView
+
 
 # coverage run --source='.' manage.py test myapp; coverage report;  coverage html
 # python -Wa manage.py test -v 3 --parallel
@@ -99,10 +100,71 @@ class LogoutViewTest(TestCase):
         user_auth = response.context['user'].is_authenticated
         self.assertFalse(user_auth)
 
-    def test_title_is_in_context(self):
+    def test_logout_title_is_in_context(self):
         response = self.client.get(reverse('api:logout'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue('title' in response.context)
+
+
+class PasswordChangeViewTest(TestCase):
+    fixtures = ['user.json']
+
+    def test_password_change_url_location(self):
+        logged_in = self.client.login(username='admin', password='123456')
+        self.assertTrue(logged_in)
+        response = self.client.get('/api/password_change/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_change_url_by_namespace(self):
+        logged_in = self.client.login(username='admin', password='123456')
+        self.assertTrue(logged_in)
+        response = self.client.get(reverse('api:password_change'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_change_template_used_is_correct(self):
+        logged_in = self.client.login(username='admin', password='123456')
+        self.assertTrue(logged_in)
+        response = self.client.get(reverse('api:password_change'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'api/registration/password_change_form.html')
+
+    def test_password_change_redirect_to_login(self):
+        response = self.client.get(reverse('api:password_change'), follow=True)
+        # last url in redirect chain
+        expected_url = response.redirect_chain[-1][0]
+        self.assertRedirects(response, expected_url=expected_url)
+
+    def test_password_change_url_name(self):
+        logged_in = self.client.login(username='admin', password='123456')
+        self.assertTrue(logged_in)
+
+        response = self.client.get(reverse('api:password_change'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.url_name, 'password_change')
+
+    def test_password_change_view_served_the_response(self):
+        response = self.client.get(reverse('api:password_change'))
+        self.assertEqual(response.resolver_match.func.view_class, UserPasswordChangeView)
+
+    def test_password_change_title_is_context(self):
+        logged_in = self.client.login(username='admin', password='123456')
+        self.assertTrue(logged_in)
+
+        response = self.client.get(reverse('api:password_change'))
+        self.assertTrue('title' in response.context)
+
+    def test_password_change_form_is_context(self):
+        logged_in = self.client.login(username='admin', password='123456')
+        self.assertTrue(logged_in)
+
+        response = self.client.get(reverse('api:password_change'))
+        self.assertTrue('form' in response.context)
+
+    def test_password_change_next_parameter(self):
+        response = self.client.get(reverse('api:password_change'))
+        self.assertEqual(response.status_code, 302)
+        self.assertURLEqual(response.url, '/api/login/?next=/api/password_change/')
+
 
 
 
