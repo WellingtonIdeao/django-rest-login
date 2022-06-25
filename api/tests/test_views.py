@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from ..views import UserLoginView
+from ..views import UserLoginView, UserLogoutView
 
 # coverage run --source='.' manage.py test myapp; coverage report;  coverage html
 # python -Wa manage.py test -v 3 --parallel
@@ -58,6 +58,61 @@ class UserLoginViewTestCase(TestCase):
         user = response.context['user']
         is_auth = user.is_authenticated
         self.assertFalse(is_auth)
+
+
+class LogoutViewTest(TestCase):
+    fixtures = ['user.json']
+
+    def test_logout_url_location(self):
+        response = self.client.get('/api/logout/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_logout_url_location_by_namespace(self):
+        response = self.client.get(reverse('api:logout'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_template_used_is_correct(self):
+        response = self.client.get(reverse('api:logout'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'api/registration/logged_out.html')
+
+    def test_login_url_name(self):
+        response = self.client.get(reverse('api:logout'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.url_name, 'logout')
+
+    def test_login_view_served_the_response(self):
+        response = self.client.get(reverse('api:logout'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, UserLogoutView)
+
+    def test_logout_auth_user(self):
+        # login the user
+        logged_in = self.client.login(username='admin', password='123456')
+        self.assertTrue(logged_in)
+
+        # logout the user
+        response = self.client.get(reverse('api:logout'))
+        self.assertEqual(response.status_code, 200)
+
+        # checks if the user is not authenticated
+        user_auth = response.context['user'].is_authenticated
+        self.assertFalse(user_auth)
+
+    def test_title_is_in_context(self):
+        response = self.client.get(reverse('api:logout'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('title' in response.context)
+
+
+
+
+
+
+
+
+
+
 
 
 
