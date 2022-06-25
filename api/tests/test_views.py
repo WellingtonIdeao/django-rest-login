@@ -34,3 +34,16 @@ class UserLoginViewTestCase(TestCase):
         # Check our user is logged in
         self.assertEqual(str(response.context['user']), 'admin')
 
+    def test_redirect_to_correct_page_after_login(self):
+        response = self.client.post(reverse('api:login'), data={'username': 'admin', 'password': '123456'}, follow=True)
+
+        # checks if redirect to correct page after the user logged in.
+        self.assertRedirects(response, expected_url=reverse('admin:index'))
+
+
+
+
+
+
+
+
