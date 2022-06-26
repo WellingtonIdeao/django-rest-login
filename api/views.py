@@ -70,6 +70,7 @@ class UserPasswordResetView(PasswordResetView):
     template_name = 'api/registration/password_reset_form.html'
     success_url = reverse_lazy('api:password_reset_done')
     email_template_name = 'api/registration/password_reset_email.html'
+    subject_template_name = 'api/registration/password_reset_subject.txt'
 
 
 # PasswordResetDoneView

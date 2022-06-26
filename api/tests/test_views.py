@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.template.loader import render_to_string
 from ..views import UserLoginView, UserLogoutView, UserPasswordChangeView,\
-    UserPasswordChangeDoneView
+    UserPasswordChangeDoneView, UserPasswordResetView
 
 
 # coverage run --source='.' manage.py test myapp; coverage report;  coverage html
@@ -231,6 +232,108 @@ class PasswordChangeDoneViewTest(TestCase):
         response = self.client.get(reverse('api:password_change_done'))
         self.assertEqual(response.status_code, 302)
         self.assertURLEqual(response.url, '/api/login/?next=/api/password_change/done/')
+
+
+class PasswordResetView(TestCase):
+
+    fixtures = ['user.json']
+
+    def test_password_reset_url_location(self):
+        response = self.client.get('/api/password_reset/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_reset_url_by_namespace(self):
+        response = self.client.get(reverse('api:password_reset'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_reset_template_used_is_correct(self):
+        response = self.client.get(reverse('api:password_reset'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'api/registration/password_reset_form.html')
+
+    def test_password_reset_url_name(self):
+        response = self.client.get(reverse('api:password_reset'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.url_name, 'password_reset')
+
+    def test_password_reset_view_served_the_response(self):
+        response = self.client.get(reverse('api:password_reset'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, UserPasswordResetView)
+
+    def test_password_reset_title_is_context(self):
+        response = self.client.get(reverse('api:password_reset'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('title' in response.context)
+
+    def test_password_reset_form_is_context(self):
+        response = self.client.get(reverse('api:password_reset'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+
+    def test_password_reset_success_url_non_existent_email(self):
+        response = self.client.post(
+            reverse('api:password_reset'),
+            data={'email': 'test@mail.com'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_url=reverse('api:password_reset_done'))
+
+    def test_password_reset_success_url_existent_email(self):
+        response = self.client.post(
+            reverse('api:password_reset'),
+            data={'email': 'admin@mail.com'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_url=reverse('api:password_reset_done'))
+
+    def test_password_reset_send_email_with_success(self):
+        from django.core import mail
+        response = self.client.post(
+            reverse('api:password_reset'),
+            data={'email': 'admin@mail.com'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_url=reverse('api:password_reset_done'))
+
+        # Test that one message has been sent.
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_password_reset_dont_send_email_with_success(self):
+        from django.core import mail
+        response = self.client.post(
+            reverse('api:password_reset'),
+            data={'email': 'test@mail.com'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_url=reverse('api:password_reset_done'))
+
+        # Test that no one message has been sent.
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_password_reset_subject_template_name(self):
+        from django.core import mail
+        response = self.client.post(
+            reverse('api:password_reset'),
+            data={'email': 'admin@mail.com'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_url=reverse('api:password_reset_done'))
+
+        # Test that one message has been sent.
+        self.assertEqual(len(mail.outbox), 1)
+
+        subject_template_name = 'api/registration/password_reset_subject.txt'
+        context = {'email': 'admin@mail.com'}
+
+        # Load a template and render it with a context. Return a string.
+        subject = render_to_string(subject_template_name, context)
+
+        # # Email subject *must not* contain newlines. Remove them
+        subject = ''.join(subject.splitlines())
+
+        # Test that one message has been sent, it has a subject
+        self.assertEqual(mail.outbox[0].subject, subject)
 
 
 
