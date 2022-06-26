@@ -18,3 +18,4 @@ staticfiles
 # test stuff:
 .coverage
 coverage.json
+*journal
