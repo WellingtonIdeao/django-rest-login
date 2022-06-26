@@ -2,14 +2,15 @@ from django.test import TestCase
 from django.urls import reverse
 from django.template.loader import render_to_string
 from ..views import UserLoginView, UserLogoutView, UserPasswordChangeView,\
-    UserPasswordChangeDoneView, UserPasswordResetView, UserPasswordResetDoneView
+    UserPasswordChangeDoneView, UserPasswordResetView, UserPasswordResetDoneView,\
+    UserPasswordResetCompleteView
 
 
 # coverage run --source='.' manage.py test myapp; coverage report;  coverage html
 # python -Wa manage.py test -v 3 --parallel
 
 
-class UserLoginViewTestCase(TestCase):
+class UserLoginViewTest(TestCase):
     fixtures = ['user.json']
 
     def test_login_url_location(self):
@@ -234,7 +235,7 @@ class PasswordChangeDoneViewTest(TestCase):
         self.assertURLEqual(response.url, '/api/login/?next=/api/password_change/done/')
 
 
-class PasswordResetView(TestCase):
+class PasswordResetViewTest(TestCase):
 
     fixtures = ['user.json']
 
@@ -336,7 +337,7 @@ class PasswordResetView(TestCase):
         self.assertEqual(mail.outbox[0].subject, subject)
 
 
-class PasswordResetDoneView(TestCase):
+class PasswordResetDoneViewTest(TestCase):
 
     def test_password_reset_done_url_location(self):
         response = self.client.get('/api/password_reset/done/')
@@ -367,6 +368,35 @@ class PasswordResetDoneView(TestCase):
         self.assertEqual(response.resolver_match.func.view_class, UserPasswordResetDoneView)
 
 
+class PasswordResetCompleteViewTest(TestCase):
+
+    def test_password_reset_complete_url_location(self):
+        response = self.client.get('/api/reset/done/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_reset_complete_url_by_namespace(self):
+        response = self.client.get(reverse('api:password_reset_complete'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_reset_complete_template_used_is_correct(self):
+        response = self.client.get(reverse('api:password_reset_complete'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'api/registration/password_reset_complete.html')
+
+    def test_password_reset_complete_url_name(self):
+        response = self.client.get(reverse('api:password_reset_complete'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.url_name, 'password_reset_complete')
+
+    def test_password_reset_complete_title_is_context(self):
+        response = self.client.get(reverse('api:password_reset_complete'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('title' in response.context)
+
+    def test_password_reset_complete_view_served_the_response(self):
+        response = self.client.get(reverse('api:password_reset_complete'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, UserPasswordResetCompleteView)
 
 
 
