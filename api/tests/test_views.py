@@ -165,6 +165,22 @@ class PasswordChangeViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertURLEqual(response.url, '/api/login/?next=/api/password_change/')
 
+    def test_password_change_success_url(self):
+        logged_in = self.client.login(username='admin', password='123456')
+        self.assertTrue(logged_in)
+        response = self.client.post(
+            reverse('api:password_change'),
+            data={
+                'old_password': '123456',
+                'new_password1': '123%()qwerasd',
+                'new_password2': '123%()qwerasd',
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_url=reverse('api:password_change_done'))
+
+
+
 
 
 
